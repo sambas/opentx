@@ -91,6 +91,9 @@
 #define LEN_VLCD               "\006"
 #define TR_VLCD                "NormalOptrex"
                                
+#define LEN_VPERSISTENT        "\015"
+#define TR_VPERSISTENT         "NO\0          ""Volo\0        ""Reset Manuale"
+
 #define LEN_COUNTRYCODES       TR("\002", "\007")
 #define TR_COUNTRYCODES        TR("US""JP""EU", "America""Japan\0 ""Europa\0")
 

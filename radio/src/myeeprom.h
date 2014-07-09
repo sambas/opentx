@@ -609,8 +609,8 @@ PACK(typedef struct {
 }) MixData;
 #else
 PACK(typedef struct {
-  uint8_t  destCh:4;
-  uint8_t  mixWarn:4;         // mixer warning
+  uint8_t  destCh:5;
+  uint8_t  mixWarn:3;         // mixer warning
   uint16_t flightModes;
   uint8_t  curveMode:1;
   uint8_t  noExpo:1;
@@ -1590,11 +1590,11 @@ PACK(typedef struct t_TimerData {
   uint16_t start;
   uint8_t  countdownBeep:2;
   uint8_t  minuteBeep:1;
-  uint8_t  persistent:1;
-  uint8_t  spare:4;
+  uint8_t  persistent:2;
+  uint8_t  spare:3;
   uint16_t value;
 }) TimerData;
-#define IS_PERSISTENT_TIMER(idx) g_model.timers[idx].persistent
+#define IS_MANUAL_RESET_TIMER(idx) (g_model.timers[idx].persistent == 2)
 #else
 PACK(typedef struct t_TimerData {
   int8_t    mode;            // timer trigger source -> off, abs, stk, stk%, sw/!sw, !m_sw/!m_sw
@@ -1603,7 +1603,7 @@ PACK(typedef struct t_TimerData {
   uint16_t  minuteBeep:1;
   uint16_t  spare:2;
 }) TimerData;
-#define IS_PERSISTENT_TIMER(idx) 0
+#define IS_MANUAL_RESET_TIMER(idx) 0
 #endif
 
 enum Protocols {
