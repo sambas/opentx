@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpinBox>
+#include <QGroupBox>
 #include <QComboBox>
 #include <QCheckBox>
 #include <QDoubleSpinBox>
@@ -9,34 +10,72 @@
 Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & generalSettings, FirmwareInterface * firmware):
   ModelPanel(parent, model, generalSettings, firmware)
 {
-  QGridLayout * gridLayout = new QGridLayout(this);
+  QGridLayout * gridLayout;
+  QGridLayout * gridLayout1;
+  QGridLayout * gridLayout2;
+  bool altlayout=twocolumns(firmware->getCapability(Outputs));
+  if (altlayout) {
+    QGridLayout * pageLayout = new QGridLayout(this);
+    QGroupBox * group1 = new QGroupBox();
+    QGroupBox * group2 = new QGroupBox();
+    pageLayout->addWidget(group1,0,1);
+    pageLayout->addWidget(group2,0,2);
+    gridLayout2 = new QGridLayout(group2);
+    gridLayout1 = new QGridLayout(group1);
+  } else {
+    gridLayout1 = new QGridLayout(this);
+  }
   bool minimize = false;
 
   int col = 1;
   if (firmware->getCapability(ChannelsName))
   {
     minimize=true;
-    addLabel(gridLayout, tr("Name"), col++);
+    addLabel(gridLayout1, tr("Name"), col++);
   }
-  addLabel(gridLayout, tr("Subtrim"), col++, minimize);
-  addLabel(gridLayout, tr("Min"), col++, minimize);
-  addLabel(gridLayout, tr("Max"), col++, minimize);
-  addLabel(gridLayout, tr("Direction"), col++, minimize);
+  addLabel(gridLayout1, tr("Subtrim"), col++, minimize);
+  addLabel(gridLayout1, tr("Min"), col++, minimize);
+  addLabel(gridLayout1, tr("Max"), col++, minimize);
+  addLabel(gridLayout1, tr("Direction"), col++, minimize);
   if (IS_TARANIS(GetEepromInterface()->getBoard()))
-    addLabel(gridLayout, tr("Curve"), col++, minimize);
+    addLabel(gridLayout1, tr("Curve"), col++, minimize);
   if (firmware->getCapability(PPMCenter))
-    addLabel(gridLayout, tr("PPM Center"), col++, minimize);
+    addLabel(gridLayout1, tr("PPM Center"), col++, minimize);
   if (firmware->getCapability(SYMLimits))
-    addLabel(gridLayout, tr("Linear Subtrim"), col++, true);
-
+    addLabel(gridLayout1, tr("Linear Subtrim"), col++, true);
+  if (altlayout){
+    int col = 1;
+    if (firmware->getCapability(ChannelsName))
+    {
+      minimize=true;
+      addLabel(gridLayout2, tr("Name"), col++);
+    }
+    addLabel(gridLayout2, tr("Subtrim"), col++, minimize);
+    addLabel(gridLayout2, tr("Min"), col++, minimize);
+    addLabel(gridLayout2, tr("Max"), col++, minimize);
+    addLabel(gridLayout2, tr("Direction"), col++, minimize);
+    if (IS_TARANIS(GetEepromInterface()->getBoard()))
+      addLabel(gridLayout2, tr("Curve"), col++, minimize);
+    if (firmware->getCapability(PPMCenter))
+      addLabel(gridLayout2, tr("PPM Center"), col++, minimize);
+    if (firmware->getCapability(SYMLimits))
+      addLabel(gridLayout2, tr("Linear Subtrim"), col++, true);    
+  }
+  int row;
   for (int i=0; i<firmware->getCapability(Outputs); i++) {
     col = 0;
-
+    if (altlayout && i>=(firmware->getCapability(Outputs)/2)) {
+      gridLayout=gridLayout2;
+      row=i-(firmware->getCapability(Outputs)/2);
+    } else {
+      gridLayout=gridLayout1;
+      row=i;
+    }
     // Channel label
     QLabel *label = new QLabel(this);
     label->setText(tr("Channel %1").arg(i+1));
     label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-    gridLayout->addWidget(label, i+1, col++, 1, 1);
+    gridLayout->addWidget(label, row+1, col++, 1, 1);
 
     // Channel name
     int nameLen = firmware->getCapability(ChannelsName);
@@ -48,7 +87,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
       name->setValidator(new QRegExpValidator(rx, this));
       name->setText(model.limitData[i].name);
       connect(name, SIGNAL(editingFinished()), this, SLOT(nameEdited()));
-      gridLayout->addWidget(name, i+1, col++, 1, 1);
+      gridLayout->addWidget(name, row+1, col++, 1, 1);
     }
 
     // Channel offset
@@ -61,7 +100,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     offset->setSingleStep(0.1);
     offset->setValue(float(model.limitData[i].offset) / 10);
     connect(offset, SIGNAL(editingFinished()), this, SLOT(offsetEdited()));
-    gridLayout->addWidget(offset, i+1, col++, 1, 1);
+    gridLayout->addWidget(offset, row+1, col++, 1, 1);
 
     // Channel min
     QDoubleSpinBox * minSB = new QDoubleSpinBox(this);
@@ -74,7 +113,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     minSB->setMaximum(0);
     minSB->setValue(float(model.limitData[i].min) / 10);
     connect(minSB, SIGNAL(editingFinished()), this, SLOT(minEdited()));
-    gridLayout->addWidget(minSB, i+1, col++, 1, 1);
+    gridLayout->addWidget(minSB, row+1, col++, 1, 1);
     minSpins << minSB;
 
     // Channel max
@@ -88,7 +127,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     maxSB->setMaximum(model.getChannelsMax());
     maxSB->setValue(float(model.limitData[i].max) / 10);
     connect(maxSB, SIGNAL(editingFinished()), this, SLOT(maxEdited()));
-    gridLayout->addWidget(maxSB, i+1, col++, 1, 1);
+    gridLayout->addWidget(maxSB, row+1, col++, 1, 1);
     maxSpins << maxSB;
 
     // Channel inversion
@@ -97,7 +136,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     invCB->setProperty("index", i);
     invCB->setCurrentIndex((model.limitData[i].revert) ? 1 : 0);
     connect(invCB, SIGNAL(currentIndexChanged(int)), this, SLOT(invEdited()));
-    gridLayout->addWidget(invCB, i+1, col++, 1, 1);
+    gridLayout->addWidget(invCB, row+1, col++, 1, 1);
 
     // Curve
     if (IS_TARANIS(GetEepromInterface()->getBoard())) {
@@ -109,7 +148,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
       }
       curveCB->setCurrentIndex(model.limitData[i].curve.value+numcurves);
       connect(curveCB, SIGNAL(currentIndexChanged(int)), this, SLOT(curveEdited()));
-      gridLayout->addWidget(curveCB, i+1, col++, 1, 1);
+      gridLayout->addWidget(curveCB, row+1, col++, 1, 1);
     }
 
     // PPM center
@@ -122,7 +161,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
       center->setValue(1500);
       center->setValue(model.limitData[i].ppmCenter + 1500);
       connect(center, SIGNAL(editingFinished()), this, SLOT(ppmcenterEdited()));
-      gridLayout->addWidget(center, i+1, col++, 1, 1);
+      gridLayout->addWidget(center, row+1, col++, 1, 1);
     }
 
     // Symetrical limits
@@ -131,11 +170,16 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
       symlimits->setProperty("index", i);
       symlimits->setChecked(model.limitData[i].symetrical);
       connect(symlimits, SIGNAL(toggled(bool)), this, SLOT(symlimitsEdited()));
-      gridLayout->addWidget(symlimits, i+1, col++, 1, 1);
+      gridLayout->addWidget(symlimits, row+1, col++, 1, 1);
     }
   }
   // Push the rows up
-  addVSpring(gridLayout, 0,firmware->getCapability(Outputs)+1);
+  if (altlayout) {
+    addVSpring(gridLayout1,0,(firmware->getCapability(Outputs)/2)+1);
+    addVSpring(gridLayout2,0,(firmware->getCapability(Outputs)/2)+1);
+  } else {
+    addVSpring(gridLayout,0,firmware->getCapability(Outputs)+1);
+  }
 
   disableMouseScrolling();
 }

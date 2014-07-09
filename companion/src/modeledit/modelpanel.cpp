@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QDesktopWidget>
 
 ModelPanel::ModelPanel(QWidget * parent, ModelData & model, GeneralSettings & generalSettings, FirmwareInterface * firmware):
   QWidget(parent),
@@ -19,6 +20,18 @@ ModelPanel::~ModelPanel()
 void ModelPanel::update()
 {
 }
+
+bool ModelPanel::twocolumns(int numelements)
+{
+  QDesktopWidget widget;
+  QRect mainScreenSize = widget.screenGeometry(widget.primaryScreen());
+  if (numelements>16 && numelements<33) {
+    return (mainScreenSize.width() > 1500)&(mainScreenSize.height() > 700);
+  } else {
+    return false;
+  }
+}
+
 
 void ModelPanel::addLabel(QGridLayout * gridLayout, QString text, int col, bool minimize)
 {

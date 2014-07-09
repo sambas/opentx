@@ -17,7 +17,7 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="4" column="1">
-      <layout class="QGridLayout" name="gridLayout_2">
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0,1">
        <item row="0" column="3">
         <widget class="QCheckBox" name="throttleReverse">
          <property name="whatsThis">

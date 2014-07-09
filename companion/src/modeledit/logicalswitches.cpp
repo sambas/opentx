@@ -4,6 +4,7 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QGroupBox>
 #include <QDoubleSpinBox>
 #include "helpers.h"
 
@@ -11,21 +12,53 @@ LogicalSwitchesPanel::LogicalSwitchesPanel(QWidget * parent, ModelData & model, 
   ModelPanel(parent, model, generalSettings, firmware),
   selectedSwitch(0)
 {
-  QGridLayout * gridLayout = new QGridLayout(this);
-
-  int col = 1;
-  addLabel(gridLayout, tr("Function"), col++);
-  addLabel(gridLayout, tr("V1"), col++);
-  addLabel(gridLayout, tr("V2"), col++);
-  addLabel(gridLayout, tr("AND Switch"), col++);
-  if (firmware->getCapability(LogicalSwitchesExt)) {
-    addLabel(gridLayout, tr("Duration"), col++);
-    addLabel(gridLayout, tr("Delay"), col++);
+  QGridLayout * gridLayout;
+  QGridLayout * gridLayout1;
+  QGridLayout * gridLayout2;
+  bool altlayout=twocolumns(firmware->getCapability(LogicalSwitches));
+  if (altlayout) {
+    QGridLayout * pageLayout = new QGridLayout(this);
+    QGroupBox * group1 = new QGroupBox();
+    QGroupBox * group2 = new QGroupBox();
+    pageLayout->addWidget(group1,0,1);
+    pageLayout->addWidget(group2,0,2);
+    gridLayout2 = new QGridLayout(group2);
+    gridLayout1 = new QGridLayout(group1);
+  } else {
+    gridLayout1 = new QGridLayout(this);
   }
 
+  int col = 1;
+  addLabel(gridLayout1, tr("Function"), col++);
+  addLabel(gridLayout1, tr("V1"), col++);
+  addLabel(gridLayout1, tr("V2"), col++);
+  addLabel(gridLayout1, tr("AND Switch"), col++);
+  if (firmware->getCapability(LogicalSwitchesExt)) {
+    addLabel(gridLayout1, tr("Duration"), col++);
+    addLabel(gridLayout1, tr("Delay"), col++);
+  }
+  if (altlayout) {
+    int col = 1;
+    addLabel(gridLayout2, tr("Function"), col++);
+    addLabel(gridLayout2, tr("V1"), col++);
+    addLabel(gridLayout2, tr("V2"), col++);
+    addLabel(gridLayout2, tr("AND Switch"), col++);
+    if (firmware->getCapability(LogicalSwitchesExt)) {
+      addLabel(gridLayout2, tr("Duration"), col++);
+      addLabel(gridLayout2, tr("Delay"), col++);
+    }    
+  }
   lock = true;
+  int row;
   for (int i=0; i<firmware->getCapability(LogicalSwitches); i++) {
     // The label
+    if (altlayout && i>=(firmware->getCapability(LogicalSwitches)/2)) {
+      gridLayout=gridLayout2;
+      row=i-(firmware->getCapability(LogicalSwitches)/2);
+    } else {
+      gridLayout=gridLayout1;
+      row=i;
+    }
     QLabel * label = new QLabel(this);
     label->setProperty("index", i);
     label->setText(tr("L%1").arg(i+1));
@@ -33,19 +66,19 @@ LogicalSwitchesPanel::LogicalSwitchesPanel(QWidget * parent, ModelData & model, 
     label->setMouseTracking(true);
     label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     connect(label, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(csw_customContextMenuRequested(QPoint)));
-    gridLayout->addWidget(label, i+1, 0);
+    gridLayout->addWidget(label, row+1, 0);
 
     // The function
     csw[i] = new QComboBox(this);
     csw[i]->setProperty("index", i);
     connect(csw[i], SIGNAL(currentIndexChanged(int)), this, SLOT(edited()));
-    gridLayout->addWidget(csw[i], i+1, 1);
+    gridLayout->addWidget(csw[i], row+1, 1);
 
     // V1
     cswitchSource1[i] = new QComboBox(this);
     cswitchSource1[i]->setProperty("index",i);
     connect(cswitchSource1[i], SIGNAL(currentIndexChanged(int)), this, SLOT(v1Edited(int)));
-    gridLayout->addWidget(cswitchSource1[i], i+1, 2);
+    gridLayout->addWidget(cswitchSource1[i], row+1, 2);
     cswitchSource1[i]->setVisible(false);
     cswitchValue[i] = new QDoubleSpinBox(this);
     cswitchValue[i]->setMaximum(125);
@@ -54,7 +87,7 @@ LogicalSwitchesPanel::LogicalSwitchesPanel(QWidget * parent, ModelData & model, 
     cswitchValue[i]->setDecimals(0);
     cswitchValue[i]->setProperty("index", i);
     connect(cswitchValue[i], SIGNAL(valueChanged(double)), this, SLOT(edited()));
-    gridLayout->addWidget(cswitchValue[i], i+1, 2);
+    gridLayout->addWidget(cswitchValue[i], row+1, 2);
     cswitchValue[i]->setVisible(false);
 
     // V2
@@ -88,13 +121,13 @@ LogicalSwitchesPanel::LogicalSwitchesPanel(QWidget * parent, ModelData & model, 
     connect(cswitchTOffset[i],SIGNAL(editingFinished()),this,SLOT(edited()));
     v2Layout->addWidget(cswitchTOffset[i]);
     cswitchTOffset[i]->setVisible(false);
-    gridLayout->addLayout(v2Layout, i+1, 3);
+    gridLayout->addLayout(v2Layout, row+1, 3);
 
     // AND
     cswitchAnd[i] = new QComboBox(this);
     cswitchAnd[i]->setProperty("index", i);
     connect(cswitchAnd[i], SIGNAL(currentIndexChanged(int)), this, SLOT(andEdited(int)));
-    gridLayout->addWidget(cswitchAnd[i], i+1, 4);
+    gridLayout->addWidget(cswitchAnd[i], row+1, 4);
 
     if (firmware->getCapability(LogicalSwitchesExt)) {
       // Duration
@@ -106,7 +139,7 @@ LogicalSwitchesPanel::LogicalSwitchesPanel(QWidget * parent, ModelData & model, 
       cswitchDuration[i]->setAccelerated(true);
       cswitchDuration[i]->setDecimals(1);
       connect(cswitchDuration[i], SIGNAL(valueChanged(double)), this, SLOT(durationEdited(double)));
-      gridLayout->addWidget(cswitchDuration[i], i+1, 5);
+      gridLayout->addWidget(cswitchDuration[i], row+1, 5);
 
       // Delay
       cswitchDelay[i] = new QDoubleSpinBox(this);
@@ -117,12 +150,16 @@ LogicalSwitchesPanel::LogicalSwitchesPanel(QWidget * parent, ModelData & model, 
       cswitchDelay[i]->setAccelerated(true);
       cswitchDelay[i]->setDecimals(1);
       connect(cswitchDelay[i], SIGNAL(valueChanged(double)), this, SLOT(delayEdited(double)));
-      gridLayout->addWidget(cswitchDelay[i], i+1, 6);
+      gridLayout->addWidget(cswitchDelay[i], row+1, 6);
     }
   }
   // Push rows upward
-  addVSpring(gridLayout,0,firmware->getCapability(LogicalSwitches)+1);
-
+  if (altlayout) {
+    addVSpring(gridLayout1,0,(firmware->getCapability(LogicalSwitches)/2)+1);
+    addVSpring(gridLayout2,0,(firmware->getCapability(LogicalSwitches)/2)+1);
+  } else {
+    addVSpring(gridLayout,0,firmware->getCapability(LogicalSwitches)+1);
+  }
   disableMouseScrolling();
 
   lock = false;
