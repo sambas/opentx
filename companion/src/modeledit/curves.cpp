@@ -98,7 +98,8 @@ Curves::Curves(QWidget * parent, ModelData & model, GeneralSettings & generalSet
   currentCurve(0)
 {
   ui->setupUi(this);
-
+  bool altlayout=twocolumns(firmware->getCapability(Outputs), 1000);
+  
   lock = true;
 
   if (!firmware->getCapability(HasCvNames)) {
@@ -120,8 +121,11 @@ Curves::Curves(QWidget * parent, ModelData & model, GeneralSettings & generalSet
     reset->setIcon(CompanionIcon("clear.png"));
     reset->setIconSize(QSize(14, 14));
     connect(reset, SIGNAL(clicked()), this, SLOT(resetCurve()));
-    ui->curvesLayout->addWidget(reset, i, 0, 1, 1);
-
+    if (i>15 && altlayout) {
+      ui->curvesLayout_2->addWidget(reset, i-16, 0, 1, 1);
+    } else {
+      ui->curvesLayout->addWidget(reset, i, 0, 1, 1);
+    }
     // The edit curve button
     QPushButton * edit = new QPushButton(this);
     edit->setProperty("index", i);
@@ -136,14 +140,22 @@ Curves::Curves(QWidget * parent, ModelData & model, GeneralSettings & generalSet
     edit->setPalette(palette);
     edit->setText(tr("Curve %1").arg(i+1));
     connect(edit, SIGNAL(clicked()), this, SLOT(editCurve()));
-    ui->curvesLayout->addWidget(edit, i, 1, 1, 1);
+    if (i>15 && altlayout) {
+      ui->curvesLayout_2->addWidget(edit, i-16, 1, 1, 1);
+    } else {
+      ui->curvesLayout->addWidget(edit, i, 1, 1, 1);
+    }
 
     // The curve plot checkbox
     QCheckBox * plot = new QCheckBox(this);
     plot->setProperty("index", i);
     plot->setPalette(palette);
     connect(plot, SIGNAL(toggled(bool)), this, SLOT(plotCurve(bool)));
-    ui->curvesLayout->addWidget(plot, i, 2, 1, 1);
+    if (i>15 && altlayout) {
+      ui->curvesLayout_2->addWidget(plot, i-16, 2, 1, 1);
+    } else {
+      ui->curvesLayout->addWidget(plot, i, 2, 1, 1);  
+    }
   }
 
   for (int i=0; i<C9X_MAX_POINTS; i++) {
