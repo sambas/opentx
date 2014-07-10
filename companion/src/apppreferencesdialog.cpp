@@ -356,7 +356,6 @@ void AppPreferencesDialog::baseFirmwareChanged()
   foreach(FirmwareInterface * firmware, firmwares) {
     if (firmware->getId() == selected_firmware) {
       populateFirmwareOptions(firmware);
-      int width = SPLASH_WIDTH;
       displayImage( ui->SplashFileName->text() );
       break;
     }
