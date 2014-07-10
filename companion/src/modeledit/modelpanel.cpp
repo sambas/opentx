@@ -21,12 +21,12 @@ void ModelPanel::update()
 {
 }
 
-bool ModelPanel::twocolumns(int numelements)
+bool ModelPanel::twocolumns(int numelements, int widthlimit)
 {
   QDesktopWidget widget;
   QRect mainScreenSize = widget.screenGeometry(widget.primaryScreen());
   if (numelements>16 && numelements<33) {
-    return (mainScreenSize.width() > 1500)&(mainScreenSize.height() > 700);
+    return (mainScreenSize.width() > widthlimit)&(mainScreenSize.height() > 700);
   } else {
     return false;
   }
@@ -43,7 +43,9 @@ void ModelPanel::addLabel(QGridLayout * gridLayout, QString text, int col, bool 
   label->setMargin(5);
   label->setText(text);
   if (!minimize)
-    label->setMinimumWidth(100);
+    label->setMinimumWidth(60);
+  else 
+    label->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::MinimumExpanding);
   gridLayout->addWidget(label, 0, col, 1, 1);
 }
 

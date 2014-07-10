@@ -15,7 +15,7 @@ LogicalSwitchesPanel::LogicalSwitchesPanel(QWidget * parent, ModelData & model, 
   QGridLayout * gridLayout;
   QGridLayout * gridLayout1;
   QGridLayout * gridLayout2;
-  bool altlayout=twocolumns(firmware->getCapability(LogicalSwitches));
+  bool altlayout=twocolumns(firmware->getCapability(LogicalSwitches), 1200);
   if (altlayout) {
     QGridLayout * pageLayout = new QGridLayout(this);
     QGroupBox * group1 = new QGroupBox();

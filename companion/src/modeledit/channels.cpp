@@ -13,7 +13,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
   QGridLayout * gridLayout;
   QGridLayout * gridLayout1;
   QGridLayout * gridLayout2;
-  bool altlayout=twocolumns(firmware->getCapability(Outputs));
+  bool altlayout=twocolumns(firmware->getCapability(Outputs), 1300);
   if (altlayout) {
     QGridLayout * pageLayout = new QGridLayout(this);
     QGroupBox * group1 = new QGroupBox();
@@ -100,6 +100,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     offset->setSingleStep(0.1);
     offset->setValue(float(model.limitData[i].offset) / 10);
     connect(offset, SIGNAL(editingFinished()), this, SLOT(offsetEdited()));
+    offset->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     gridLayout->addWidget(offset, row+1, col++, 1, 1);
 
     // Channel min
@@ -113,6 +114,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     minSB->setMaximum(0);
     minSB->setValue(float(model.limitData[i].min) / 10);
     connect(minSB, SIGNAL(editingFinished()), this, SLOT(minEdited()));
+    minSB->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     gridLayout->addWidget(minSB, row+1, col++, 1, 1);
     minSpins << minSB;
 
@@ -127,6 +129,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     maxSB->setMaximum(model.getChannelsMax());
     maxSB->setValue(float(model.limitData[i].max) / 10);
     connect(maxSB, SIGNAL(editingFinished()), this, SLOT(maxEdited()));
+    maxSB->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     gridLayout->addWidget(maxSB, row+1, col++, 1, 1);
     maxSpins << maxSB;
 
@@ -136,6 +139,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
     invCB->setProperty("index", i);
     invCB->setCurrentIndex((model.limitData[i].revert) ? 1 : 0);
     connect(invCB, SIGNAL(currentIndexChanged(int)), this, SLOT(invEdited()));
+    invCB->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
     gridLayout->addWidget(invCB, row+1, col++, 1, 1);
 
     // Curve
@@ -148,6 +152,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
       }
       curveCB->setCurrentIndex(model.limitData[i].curve.value+numcurves);
       connect(curveCB, SIGNAL(currentIndexChanged(int)), this, SLOT(curveEdited()));
+      curveCB->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
       gridLayout->addWidget(curveCB, row+1, col++, 1, 1);
     }
 
@@ -161,6 +166,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
       center->setValue(1500);
       center->setValue(model.limitData[i].ppmCenter + 1500);
       connect(center, SIGNAL(editingFinished()), this, SLOT(ppmcenterEdited()));
+      center->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
       gridLayout->addWidget(center, row+1, col++, 1, 1);
     }
 
@@ -170,6 +176,7 @@ Channels::Channels(QWidget * parent, ModelData & model, GeneralSettings & genera
       symlimits->setProperty("index", i);
       symlimits->setChecked(model.limitData[i].symetrical);
       connect(symlimits, SIGNAL(toggled(bool)), this, SLOT(symlimitsEdited()));
+      symlimits->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
       gridLayout->addWidget(symlimits, row+1, col++, 1, 1);
     }
   }

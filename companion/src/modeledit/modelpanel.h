@@ -33,7 +33,7 @@ class ModelPanel : public QWidget
     void addDoubleSpring(QGridLayout *, int col, int row);
     virtual bool eventFilter(QObject *obj, QEvent *event);
     void disableMouseScrolling();
-    bool twocolumns(int numelements);
+    bool twocolumns(int numelements, int widthlimit);
 };
 
 #endif // CHANNELS_H
