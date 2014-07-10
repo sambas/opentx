@@ -167,7 +167,7 @@ void AppPreferencesDialog::initSettings()
   ui->profileNameLE->setText(g.profile[g.id()].name());
   ui->SplashFileName->setText(g.profile[g.id()].splashFile());
 
-  displayImage( g.profile[g.id()].splashFile() );
+  displayImage( ui->SplashFileName->text() );
 
   QString hwSettings;
   if (g.profile[g.id()].stickPotCalib() == "" ) {
@@ -303,11 +303,18 @@ bool AppPreferencesDialog::displayImage( QString fileName )
 
   // Use the firmware name to determine splash width
   int width = SPLASH_WIDTH;
-  if (g.profile[g.id()].fwType().contains("taranis"))
-    width = SPLASHX9D_WIDTH;
-  
-  ui->imageLabel->setPixmap( makePixMap( image, g.profile[g.id()].fwType()));
+  QVariant selected_firmware = ui->downloadVerCB->itemData(ui->downloadVerCB->currentIndex());
+  QString fwtype=g.profile[g.id()].fwType();
+  foreach(FirmwareInterface * firmware, firmwares) {
+    if (firmware->getId() == selected_firmware) {
+      fwtype=firmware->getId();
+      if (fwtype.contains("taranis"))
+        width = SPLASHX9D_WIDTH;  
+      break;
+    }
+  }
   ui->imageLabel->setFixedSize(width, SPLASH_HEIGHT);
+  ui->imageLabel->setPixmap( makePixMap( image, fwtype));
   return true;
 }
 
@@ -322,8 +329,7 @@ void AppPreferencesDialog::on_SplashSelect_clicked()
           tr("Open Image to load"), g.imagesDir(), tr("Images (%1)").arg(supportedImageFormats));
 
   if (!fileName.isEmpty()){
-    g.imagesDir(QFileInfo(fileName).dir().absolutePath());
-   
+    g.imagesDir(QFileInfo(fileName).dir().absolutePath()); 
     displayImage(fileName);
     ui->SplashFileName->setText(fileName);
   }
@@ -350,6 +356,8 @@ void AppPreferencesDialog::baseFirmwareChanged()
   foreach(FirmwareInterface * firmware, firmwares) {
     if (firmware->getId() == selected_firmware) {
       populateFirmwareOptions(firmware);
+      int width = SPLASH_WIDTH;
+      displayImage( ui->SplashFileName->text() );
       break;
     }
   }
