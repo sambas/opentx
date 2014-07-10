@@ -352,10 +352,13 @@ void AppPreferencesDialog::showVoice(bool show)
 void AppPreferencesDialog::baseFirmwareChanged()
 {
   QVariant selected_firmware = ui->downloadVerCB->itemData(ui->downloadVerCB->currentIndex());
-
+  int width = SPLASH_WIDTH;
   foreach(FirmwareInterface * firmware, firmwares) {
     if (firmware->getId() == selected_firmware) {
       populateFirmwareOptions(firmware);
+      if (firmware->getId().contains("taranis"))
+        width = SPLASHX9D_WIDTH;
+      ui->imageLabel->setFixedSize(width, SPLASH_HEIGHT);
       displayImage( ui->SplashFileName->text() );
       break;
     }
