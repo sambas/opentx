@@ -304,7 +304,9 @@ void frskySportProcessPacket(uint8_t *packet)
             frskyData.hub.maxAirSpeed = frskyData.hub.airSpeed;
         }
         else if (appId >= GPS_SPEED_FIRST_ID && appId <= GPS_SPEED_LAST_ID) {
-          frskyData.hub.gpsSpeed_bp = (uint16_t) (SPORT_DATA_U32(packet)/1000);
+          uint32_t speed = SPORT_DATA_U32(packet);
+          frskyData.hub.gpsSpeed_bp = (uint16_t)(speed/1000);
+          frskyData.hub.gpsSpeed_ap = (uint16_t)(speed%1000);
           if (frskyData.hub.gpsSpeed_bp > frskyData.hub.maxGpsSpeed)
             frskyData.hub.maxGpsSpeed = frskyData.hub.gpsSpeed_bp;
         }
